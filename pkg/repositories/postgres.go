@@ -18,10 +18,6 @@ type Config struct {
 }
 
 func NewPostgresDB(cfg Config) (*sqlx.DB, error) {
-	if err := migration(cfg); err != nil {
-		return nil, err
-	}
-
 	db, err := sqlx.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.Username, cfg.DBName, cfg.Password, cfg.SSLMode))
 	if err != nil {
@@ -33,17 +29,16 @@ func NewPostgresDB(cfg Config) (*sqlx.DB, error) {
 		return nil, err
 	}
 
+	if err = migration(db); err != nil {
+		return nil, err
+	}
+
 	return db, nil
 }
 
-func migration(cfg Config) error {
-	dbc, err := sqlx.Connect("postgres", "host="+cfg.Host+" user="+cfg.Username+" dbname="+cfg.DBName+" port="+cfg.Port+" sslmode="+cfg.SSLMode+" password="+cfg.Password)
-	if err != nil {
-		logrus.Printf("migration : Register DB : %v", err)
-	}
-	defer dbc.Close()
-
-	m := sqlxmigrate.New(dbc, sqlxmigrate.DefaultOptions, []*sqlxmigrate.Migration{
+func migration(db *sqlx.DB) error {
+	var err error
+	m := sqlxmigrate.New(db, sqlxmigrate.DefaultOptions, []*sqlxmigrate.Migration{
 		// create tables
 		{
 			ID: "201608301400",

@@ -1,0 +1,27 @@
+db:
+    host:       "localhost"
+    port:       "5432"
+    username:   "postgres"
+    dbname:     "postgres"
+    sslmode:    "disable"
+
+messages:
+    responses:
+        start:                      "Привет:) \nБот может оперделять Международные праздники и памятные даты \nА так же вы можете сохранять свои праздничные дни \n\nОтправь мне любую дату в формате СТРАНА.ММ.ДД, я отправль информацию про этот день \nПример: \nВы:>  ru.12.21 \nБот:> Декабрьское солнцестояние  \nВы:>  kz.05.02 \nБот:> День единства  \n\nВы можете управлять мной, отправив следующие команды: \n\n/addNewEvent - Добавить свой день \n/getFirstQueryInfo - Ваш первый запрос \n/getAllQueriesCount - Сколько запросов вы узнали(оправили боту) \n"
+        replySuccessSaveNewDate:    "Успешно сохранено!"
+        replyAddNewDate:            "Сначала отправьте дату в формате MM.DD :)"
+        replyAddNewDescription:     "Теперь отправьте описание"
+        simpleDay:                  "Обычный день!"
+    errors:
+        unknownCommand:             "Неизвестная команда!"
+        default:                    "Произошла неизвестная команда"
+        wrongDateFormat:            "Неправильный формат даты!"
+        wrongNewDateFormat:         "Неправильный формат даты \nОтправьте снова команду /addNewEvent"
+        unknownError:               "Что-то пошло не так!"
+        nullResponse:               "База пустая"
+
+commands:
+    start:                      "start"
+    getFirstQueryInfo:          "getFirstQueryInfo"
+    getAllQueriesCount:         "getAllQueriesCount"
+    addNewEvent:                "addNewEvent"

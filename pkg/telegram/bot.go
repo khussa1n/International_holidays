@@ -2,38 +2,54 @@ package telegram
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"log"
+	"github.com/sirupsen/logrus"
+	"telegram_bot_golang/pkg/services"
 )
 
 type Bot struct {
-	bot *tgbotapi.BotAPI
+	bot     *tgbotapi.BotAPI
+	service *services.Service
 }
 
-func NewBot(bot *tgbotapi.BotAPI) *Bot {
-	return &Bot{bot: bot}
+func NewBot(bot *tgbotapi.BotAPI, service *services.Service) *Bot {
+	return &Bot{bot: bot, service: service}
 }
 
 func (b *Bot) Start() error {
-	log.Printf("Authorized on account %s", b.bot.Self.UserName)
+	logrus.Printf("Authorized on account %s", b.bot.Self.UserName)
 
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-
-	updates, err := b.bot.GetUpdatesChan(u)
+	updates, err := b.initUpdatesChannel()
 	if err != nil {
 		return err
 	}
 
-	for update := range updates {
-		if update.Message != nil { // If we got a message
-			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-			msg.ReplyToMessageID = update.Message.MessageID
-
-			b.bot.Send(msg)
-		}
-	}
+	b.handleUpdates(updates)
 
 	return nil
+}
+
+func (b *Bot) handleUpdates(updates tgbotapi.UpdatesChannel) {
+	for update := range updates {
+		if update.Message == nil { // If we got a message
+			continue
+		}
+
+		if update.Message.IsCommand() {
+			if err := b.handleCommand(update.Message, updates); err != nil {
+				b.handleError(update.Message.Chat.ID, err)
+			}
+			continue
+		}
+
+		if err := b.handleMessage(update.Message); err != nil {
+			b.handleError(update.Message.Chat.ID, err)
+		}
+	}
+}
+
+func (b *Bot) initUpdatesChannel() (tgbotapi.UpdatesChannel, error) {
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
+
+	return b.bot.GetUpdatesChan(u)
 }

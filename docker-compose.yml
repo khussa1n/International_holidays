@@ -1,0 +1,19 @@
+version: '3.9'
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 5433:5432
+
+  bot:
+    build: .
+    command: sh -c 'while !</dev/tcp/db/5432; do sleep 1; done; .bin/bot'
+    ports:
+      - 8000:80
+    depends_on:
+      - db
+

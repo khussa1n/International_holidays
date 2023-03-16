@@ -1,4 +1,5 @@
 FROM fedora
 EXPOSE  80
-COPY . .
-CMD [".bin/bot"]
+COPY ./.bin ./.env ./
+COPY ./configs ./configs
+CMD ["/bot"]

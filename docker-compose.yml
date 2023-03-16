@@ -11,7 +11,7 @@ services:
 
   bot:
     build: .
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; .bin/bot'
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; /bot'
     ports:
       - 8000:80
     depends_on:

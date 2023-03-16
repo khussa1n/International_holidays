@@ -11,6 +11,8 @@ func ValidateDate(month, day string) bool {
 	}
 	if monthInt > 0 && monthInt <= 12 {
 		output = true
+	} else {
+		return false
 	}
 
 	dayInt, err := strconv.Atoi(day)
@@ -19,9 +21,11 @@ func ValidateDate(month, day string) bool {
 	}
 	if dayInt > 0 && dayInt <= 31 {
 		output = true
+	} else {
+		return false
 	}
 
-	if monthInt == 02 && dayInt >= 30 {
+	if monthInt == 2 && dayInt > 29 {
 		return false
 	}
 

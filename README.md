@@ -7,7 +7,6 @@
 Для запуска нужно выполнить эти команды
 
 ```
-
 docker-compose up --build bot
 
 ```
@@ -15,7 +14,6 @@ docker-compose up --build bot
 Если хотите запустить свой бинарник выполните эти команды
 
 ```
-
 go download
 make build
 make docker-compos-run

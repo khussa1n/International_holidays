@@ -25,12 +25,12 @@ func main() {
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
-		Password: os.Getenv("DB_PASSWORD"),
+		Password: viper.GetString("db.password"),
 		DBName:   viper.GetString("db.dbname"),
 		SSLMode:  viper.GetString("db.sslmode"),
 	})
 	if err != nil {
-		logrus.Printf("Failed to initializ db: %s", err.Error())
+		logrus.Fatalf("Failed to initializ db: %s", err.Error())
 	}
 
 	repos := repositories.NewRepository(db)

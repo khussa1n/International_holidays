@@ -13,5 +13,5 @@ migrate:
 drop:
 	migrate -path ./migrations -database 'postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable' down
 
-docker-compose:
+docker-compos-run:
 	docker-compose up --build bot

@@ -19,14 +19,13 @@ func (b *Bot) handleCommand(message *tgbotapi.Message, updates tgbotapi.UpdatesC
 	case viper.GetString("commands.getAllQueriesCount"):
 		return b.handleGetUserAllQueriesCountCommand(message)
 	case viper.GetString("commands.addNewEvent"):
-		return b.addNewEvent(message, updates)
+		return b.handleaddNewEvent(message, updates)
 	default:
 		return ErrorUnknownCommand
 	}
 }
 
-func (b *Bot) addNewEvent(message *tgbotapi.Message, updates tgbotapi.UpdatesChannel) error {
-	logrus.Printf("[%s] %s", message.From.UserName, "Provet")
+func (b *Bot) handleaddNewEvent(message *tgbotapi.Message, updates tgbotapi.UpdatesChannel) error {
 	msg := tgbotapi.NewMessage(message.Chat.ID, viper.GetString("messages.responses.replyAddNewDate"))
 	b.bot.Send(msg)
 
@@ -38,7 +37,9 @@ func (b *Bot) addNewEvent(message *tgbotapi.Message, updates tgbotapi.UpdatesCha
 			continue
 		}
 		if update.Message.IsCommand() {
-			b.handleCommand(update.Message, updates)
+			if err := b.handleCommand(update.Message, updates); err != nil {
+				b.handleError(update.Message.Chat.ID, err)
+			}
 			return nil
 		}
 
@@ -46,61 +47,28 @@ func (b *Bot) addNewEvent(message *tgbotapi.Message, updates tgbotapi.UpdatesCha
 		logrus.Printf("%s", update.Message.Text)
 		if len(val) == 2 {
 			if ch := ValidateDate(val[0], val[1]); ch != true {
-				return ErrorWrongDateFormat
-				break
+				return ErrorWrongNewDateFormat
 			}
 			date = update.Message.Text
 			first = false
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, viper.GetString("messages.responses.replyAddNewDescription"))
+			msg = tgbotapi.NewMessage(update.Message.Chat.ID, viper.GetString("messages.responses.replyAddNewDescription"))
 			b.bot.Send(msg)
 			continue
 		} else if first && len(val) != 2 {
 			return ErrorWrongNewDateFormat
-			break
 		}
 		if !first {
-			err := b.handleNewEventDate(date, update.Message)
+			err := b.service.CreateDate(&models.Dates{ChatID: update.Message.Chat.ID, Description: update.Message.Text, Date: date})
 			if err != nil {
 				return ErrorUnknown
-			} else {
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, viper.GetString("messages.responses.replySuccessSaveNewDate"))
-				b.bot.Send(msg)
 			}
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, viper.GetString("messages.responses.replySuccessSaveNewDate"))
+			b.bot.Send(msg)
 			break
 		}
 	}
 
 	return nil
-}
-
-func (b *Bot) handleNewEventDate(date string, message *tgbotapi.Message) error {
-	return b.service.CreateDate(&models.Dates{ChatID: message.Chat.ID, Description: message.Text, Date: date})
-}
-
-func ValidateDate(month, day string) bool {
-	output := false
-
-	monthInt, err := strconv.Atoi(month)
-	if err != nil {
-		return false
-	}
-	if monthInt > 0 && monthInt <= 12 {
-		output = true
-	}
-
-	dayInt, err := strconv.Atoi(day)
-	if err != nil {
-		return false
-	}
-	if dayInt > 0 && dayInt <= 31 {
-		output = true
-	}
-
-	if monthInt == 02 && dayInt >= 30 {
-		return false
-	}
-
-	return output
 }
 
 func (b *Bot) handleMessage(message *tgbotapi.Message) error {
@@ -122,14 +90,14 @@ func (b *Bot) handleMessage(message *tgbotapi.Message) error {
 			datestring := strings.Join(datearray, ", ")
 
 			if len(response.Holidays) != 0 {
-				b.service.CreateUser(models.NewUsers(message.Chat.ID, message.From.UserName, time.Now().String()+" Message: "+message.Text, 1))
-
+				b.service.UpdateUserAllQueriesCount(message.Chat.ID)
 				msg := tgbotapi.NewMessage(message.Chat.ID, response.Holidays[0].Name+" \n"+datestring)
 				b.bot.Send(msg)
 				return nil
 			} else if len(datearray) != 0 {
 				msg := tgbotapi.NewMessage(message.Chat.ID, datestring)
 				b.bot.Send(msg)
+
 				return nil
 			} else {
 				msg := tgbotapi.NewMessage(message.Chat.ID, viper.GetString("messages.responses.simpleDay")+" \n"+datestring)
@@ -140,7 +108,6 @@ func (b *Bot) handleMessage(message *tgbotapi.Message) error {
 	}
 
 	return ErrorWrongDateFormat
-
 }
 
 func (b *Bot) handleGetFirstQueryTimeCommand(message *tgbotapi.Message) error {
@@ -157,7 +124,7 @@ func (b *Bot) handleGetFirstQueryTimeCommand(message *tgbotapi.Message) error {
 	}
 
 	msg := tgbotapi.NewMessage(message.Chat.ID, firstQueryTime)
-	_, err = b.bot.Send(msg)
+	b.bot.Send(msg)
 	return nil
 }
 
@@ -170,7 +137,7 @@ func (b *Bot) handleGetUserAllQueriesCountCommand(message *tgbotapi.Message) err
 	}
 
 	msg := tgbotapi.NewMessage(message.Chat.ID, strconv.FormatInt(int64(allQueriesCount), 10))
-	_, err = b.bot.Send(msg)
+	b.bot.Send(msg)
 	return nil
 }
 
@@ -178,6 +145,9 @@ func (b *Bot) handleStartCommand(message *tgbotapi.Message) error {
 	logrus.Printf("[%s] %s", message.From.UserName, message.Text)
 
 	msg := tgbotapi.NewMessage(message.Chat.ID, viper.GetString("messages.responses.start"))
-	_, err := b.bot.Send(msg)
+	b.bot.Send(msg)
+
+	err := b.service.CreateUser(models.NewUsers(message.Chat.ID, message.From.UserName, time.Now().String()+" Message: "+message.Text, 0))
+
 	return err
 }

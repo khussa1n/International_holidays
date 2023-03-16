@@ -18,18 +18,21 @@ type Config struct {
 }
 
 func NewPostgresDB(cfg Config) (*sqlx.DB, error) {
-	db, err := sqlx.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
+	db, err := sqlx.Connect("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.Username, cfg.DBName, cfg.Password, cfg.SSLMode))
 	if err != nil {
+		logrus.Printf("Failed Open DB: %s", err.Error())
 		return nil, err
 	}
 
 	err = db.Ping()
 	if err != nil {
+		logrus.Printf("Failed Ping to DB: %s", err.Error())
 		return nil, err
 	}
 
 	if err = migration(db); err != nil {
+		logrus.Printf("Migration failed: %s", err.Error())
 		return nil, err
 	}
 

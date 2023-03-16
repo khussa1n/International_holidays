@@ -1,14 +1,15 @@
 db:
-    host:       "localhost"
+    host:       "db"
     port:       "5432"
     username:   "postgres"
     dbname:     "postgres"
+    password:   "postgres"
     sslmode:    "disable"
 
 messages:
     responses:
         start:                      "Привет:) \nБот может оперделять Международные праздники и памятные даты \nА также вы можете сохранять свои праздничные дни \n\nОтправь мне любую дату в формате СТРАНА.ММ.ДД, я отправль информацию про этот день \nПример: \nВы:>  ru.12.21 \nБот:> Декабрьское солнцестояние  \nВы:>  kz.05.02 \nБот:> День единства  \n\nВы можете управлять мной, отправив следующие команды: \n\n/addNewEvent - Добавить свой день \n/getFirstQueryInfo - Ваш первый запрос \n/getAllQueriesCount - Сколько запросов вы узнали(оправили боту) \n"
-        replySuccessSaveNewDate:    "Успешно сохранено!"
+        replySuccessSaveNewDate:    "Успешно сохранено! \nЧто бы увидеть отправте дату в формате СС.ММ.ДД \nСС - название вашей страны: ru, kz, ..."
         replyAddNewDate:            "Сначала отправьте дату в формате MM.DD :)"
         replyAddNewDescription:     "Теперь отправьте описание"
         simpleDay:                  "Обычный день!"

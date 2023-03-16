@@ -18,8 +18,8 @@ func (s *UserService) CreateUser(user *models.Users) error {
 	if err != nil {
 		return s.repo.CreateUser(user)
 	}
-	s.repo.UpdateUserAllQueriesCount(user.ChatID)
-	return err
+
+	return nil
 }
 
 func (s *UserService) UpdateUserAllQueriesCount(charID int64) error {

@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
@@ -16,9 +17,17 @@ func NewUserRepo(db *sqlx.DB) *UserRepo {
 }
 
 func (r *UserRepo) CreateUser(user *models.Users) error {
-	query := fmt.Sprintf("INSERT INTO %s (chat_id, username, first_query_time, all_queries_count) values ($1, $2, $3, $4) RETURNING id", "users")
+	var query string
+	var row *sql.Row
+	if user.AllQueriesCount == 0 {
+		query = fmt.Sprintf("INSERT INTO %s (chat_id, username, first_query_time, all_queries_count) values ($1, $2, $3, $4) RETURNING id", "users")
 
-	row := r.db.QueryRow(query, user.ChatID, user.Username, user.FirstQueryTime, user.AllQueriesCount)
+		row = r.db.QueryRow(query, user.ChatID, user.Username, user.FirstQueryTime, 0)
+	} else {
+		query = fmt.Sprintf("INSERT INTO %s (chat_id, username, first_query_time, all_queries_count) values ($1, $2, $3, $4) RETURNING id", "users")
+
+		row = r.db.QueryRow(query, user.ChatID, user.Username, user.FirstQueryTime, user.AllQueriesCount)
+	}
 
 	var id int
 	if err := row.Scan(&id); err != nil {

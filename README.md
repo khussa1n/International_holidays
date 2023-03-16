@@ -7,9 +7,18 @@
 Для запуска нужно выполнить эти команды
 
 ```
-make build
 
-make docker-compose
+docker-compose up --build bot
+
+```
+
+Если хотите запустить свой бинарник выполните эти команды
+
+```
+
+go download
+make build
+make docker-compos-run
 
 ```
 

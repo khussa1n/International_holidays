@@ -7,11 +7,11 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
-      - 5433:5432
+      - 5434:5432
 
   bot:
     build: .
-    command: sh -c 'while !</dev/tcp/db/5432; do sleep 1; done; .bin/bot'
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; .bin/bot'
     ports:
       - 8000:80
     depends_on:

@@ -14,7 +14,7 @@ docker-compose up --build bot
 Если хотите запустить свой бинарник выполните эти команды
 
 ```
-go download
+go mod download
 make build
 make docker-compose-run
 

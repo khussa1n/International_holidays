@@ -18,7 +18,7 @@ docker-compose up --build bot
 
 go download
 make build
-make docker-compos-run
+make docker-compose-run
 
 ```
 

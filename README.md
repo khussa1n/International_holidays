@@ -1,17 +1,15 @@
 # KhussainGolangHolidayBot
 
-Телеграм бот для определения Международных праздник и памятных дат и сохранение своих праздничных дней
+Telegram bot to determine International holidays and memorable dates and save your holidays
 
 ## Getting started
-
-Для запуска нужно выполнить эти команды
 
 ```
 docker-compose up --build bot
 
 ```
 
-Если хотите запустить свой бинарник выполните эти команды
+If you want to run your binary use these commands
 
 ```
 go mod download
